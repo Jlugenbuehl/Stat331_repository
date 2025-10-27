@@ -22,14 +22,16 @@ execute:
 
 ```{r}
 #| label: wd-1-csv-1
-
+surveys <- read_csv(here("week2", "lab2", "surveys.csv"))  
+# revisions from lab2 Q1
 ```
 
 -   `csv` Example 2
 
 ```{r}
 #| label: wd-1-csv-2
-
+evals <- read_csv(here("week3", "teacher_evals.csv"))
+# revisions from lab3 Q2
 ```
 
 -   `xlsx`
@@ -45,21 +47,27 @@ execute:
 
 ```{r}
 #| label: wd-2-ex-1
-
+  select(description)
+# from lab 5 first code chunk
 ```
 
 -   Example removing specified columns
 
 ```{r}
 #| label: wd-2-ex-2
-
+suspects <- right_join(interview, suspects) |>
+  select(-person_id, -license_id, -address_number, -address_street_name, 
+         -ssn, -age, -height, -eye_color, -hair_color, -gender, -car_make,
+         -car_model)
+# revised from lab5 3rd chunk
 ```
 
 -   Example selecting columns based on logical values (e.g., `starts_with()`, `ends_with()`, `contains()`, `where()`)
 
 ```{r}
 #| label: wd-2-ex-3
-
+  select(name, hair_color, height, event_name, date, starts_with("car_"))
+#Revised from lab5 where I'm trying to display certain columns
 ```
 
 **WD-3: I can filter rows from a dataframe for a *variety* of data types (e.g., numeric, integer, character, factor, date).**
@@ -68,72 +76,118 @@ execute:
 
 ```{r}
 #| label: wd-3-numeric-ex-1
-
+averages |> filter(avg_q1 == min(avg_q1) | avg_q1 == max(avg_q1))
+#Lab 3 Q2
 ```
 
 -   Numeric Example 2
 
 ```{r}
 #| label: wd-3-numeric-ex-1
-
+averages <- teacher_evals_clean |> 
+  filter(question_no == 901) |>
+  group_by(teacher_id) |> 
+  summarise( 
+    n_courses = n_distinct(course_id),
+    avg_q1 = mean(SET_score_avg, na.rm=TRUE), 
+    .groups="drop"
+  ) |>
+  filter(n_courses>=5) 
+#Lab 3 Q2
 ```
 
 -   Character Example 1 (any context)
 
 ```{r}
 #| label: wd-3-character
-
+ca_childcare <- counties |>
+  filter(state_abbreviation == "CA") |>
+  left_join(childcare_costs, 
+            counties, by = "county_fips_code")
+#lab 4 Q2
 ```
 
 -   Character Example 2 (example must use functions from **stringr**)
 
 ```{r}
 #| label: wd-3-string
-
+response_averages <- teacher_evals_clean |> 
+  filter(str_detect(academic_degree, "dr|prof")) |>
+  group_by(teacher_id) |>
+  filter(row_number() == 1) |> #got this from chat https://chatgpt.com/share/e/68e34425-f764-8010-a98b-0a7e4b54b002
+  summarise(
+    avg_responses = mean(resp_share, na.rm = TRUE),
+    seniority = seniority,
+    sex = sex,
+    .groups = "drop"
+  ) 
+#lab3 Q12
 ```
 
 -   Date (example must use functions from **lubridate**)
 
 ```{r}
 #| label: wd-3-date
+crime_scene_report <- crime_scene_report |> 
+  rename(date_col = date) |>
+  mutate(new_date = ymd(as.character(date_col))) |> 
+  filter(new_date == crime_date & type == "murder" & city == "SQL City") |>
+  select(description)
+
+#lab5 first part
 
 ```
 
 **WD-4: I can modify existing variables and create new variables in a dataframe for a *variety* of data types (e.g., numeric, integer, character, factor, date).**
 
--   Numeric Example 1
+-   Numeric Example 13
 
 ```{r}
 #| label: wd-4-numeric-ex-1
-
+  summarise(median_price = median(mc_infant, na.rm = TRUE),
+            .groups = "drop") |>
+#lab4 question 6
 ```
 
 -   Numeric Example 2
 
 ```{r}
 #| label: wd-4-numeric-ex-2
-
+  summarise(median_household_income = median(mhi_2018, na.rm = TRUE),
+            .groups = "drop") |>
+#lab4 question 5
 ```
 
 -   Factor Example 1 (renaming levels)
 
 ```{r}
 #| label: wd-4-factor-ex-1
-
+  mutate(child_type = factor(child_type,
+         levels = c("mc_infant","mc_toddler","mc_preschool"), 
+         labels = c("Infant","Toddler","Preschool"))) |>
+#lab4 part 7
 ```
 
 -   Factor Example 2 (reordering levels)
 
 ```{r}
 #| label: wd-4-factor-ex-2
-
+mutate(
+    care_type  = recode(care_type, mfcc = "Family-based", mc = "Center-based"),
+    care_type  = factor(care_type, levels = c("Family-based", "Center-based")), # top row then bottom row
+    child_type = factor(str_to_title(child_type), levels = c("Infant","Toddler","Preschool")) # columns L→R
+  )
+#challenge 4 chunk 2
 ```
 
 -   Character (example must use functions from **stringr**)
 
 ```{r}
 #| label: wd-4-string
-
+mutate(
+    SET_level = ifelse(SET_score_avg >= 4, str_to_title("excellent"), str_to_title("standard"))
+  )
+#challenge 3 part1 revised
 ```
 
 -   Date (example must use functions from **lubridate**)
@@ -141,6 +195,13 @@ execute:
 ```{r}
 #| label: wd-4-date
 
+crime_scene_report <- crime_scene_report |> 
+  rename(date_col = date) |>
+  mutate(new_date = ymd(as.character(date_col))) |> 
+  filter(new_date == crime_date & type == "murder" & city == "SQL City") |>
+  select(description)
+
+#lab5 part 1 revised
 ```
 
 **WD-5: I can use mutating joins to combine multiple dataframes.**
@@ -149,21 +210,28 @@ execute:
 
 ```{r}
 #| label: wd-5-left-ex-1
-
+suspects <- left_join(get_fit_now_member, suspects, by = c("id" = "membership_id")) |> 
+  filter(membership_status == "gold" & str_detect(id, pattern = "^48Z")) |> select(person_id)
+#lab5 part 3
 ```
 
 -   `right_join()` Example 1
 
 ```{r}
 #| label: wd-5-right
-
+suspects <- right_join(interview, suspects) |>
+  select(-person_id, -license_id, -address_number, -address_street_name, 
+         -ssn, -age, -height, -eye_color, -hair_color, -gender, -car_make,
+         -car_model)
+#lab5 part 3 revised
 ```
 
 -   `left_join()` **or** `right_join()` Example 2
 
 ```{r}
 #| label: wd-5-left-right-ex-2
-
+criminal <- left_join(criminal, person, by = c("id" = "license_id")) 
+#lab 5 part 4
 ```
 
 -   `inner_join()` Example 1
@@ -186,7 +254,8 @@ execute:
 
 ```{r}
 #| label: wd-6-semi
-
+criminal <- semi_join(criminal, income) 
+#lab5 part 4 revised
 ```
 
 -   `anti_join()`
@@ -202,14 +271,20 @@ execute:
 
 ```{r}
 #| label: wd-7-long
-
+pivot_longer(
+    cols = c(mc_infant, mc_toddler, mc_preschool),
+    names_to = "child_type",
+    values_to = "median_price") |>
+#lab 4 question 7
 ```
 
 -   `pivot_wider()`
 
 ```{r}
 #| label: wd-7-wide
-
+  pivot_wider(names_from = study_year,
+              values_from = median_household_income) |>
+#lab 4 question 5 
 ```
 
 ## Reproducibility
@@ -218,10 +293,10 @@ execute:
 
 The following assignments satisfy the above criteria:
 
--   Example 1
--   Example 2
--   Example 3
--   Example 4
+-   Lab3
+-   challenge 3
+-   lab 2
+-   challenge 2
 -   Example 5
 
 **R-2: I can write well documented and tidy code.**
@@ -230,14 +305,28 @@ The following assignments satisfy the above criteria:
 
 ```{r}
 #| label: r-2-1
-
+ggplot(data = ToothGrowth, 
+       mapping = aes(x = supp, y = len)) +
+  geom_boxplot() +
+  labs(x = "Supplement", y = "Length of Teeth (mm)")
+#lab 1 question 6
 ```
 
 -   Example of **dplyr** pipeline
 
 ```{r}
 #| label: r-2-2
+averages <- teacher_evals_clean |> 
+  filter(question_no == 901) |>
+  group_by(teacher_id) |> 
+  summarise( 
+    n_courses = n_distinct(course_id),
+    avg_q1 = mean(SET_score_avg, na.rm=TRUE), 
+    .groups="drop"
+  ) |>
+  filter(n_courses>=5) 
 
+#lab 3 question 10
 ```
 
 -   Example of function formatting
@@ -271,21 +360,60 @@ The following assignments satisfy the above criteria:
 
 ```{r}
 #| label: dvs-1-num
-
+ggplot(df_long, aes(x = study_year, 
+                    y = median_price,
+                    color = fct_reorder2(census_region, study_year, median_price))) +
+  geom_point() +
+  scale_x_continuous(breaks = seq(2008, 2018, by = 2)) +
+  scale_y_continuous(trans = "log10",
+                     breaks = c(100,150,200,300,400,500),
+                     labels = scales::dollar) +
+  geom_smooth() +
+  facet_grid(care_type ~ child_type, scales = "free_y") +  
+  labs(x = "Study Year", y = "Median price", color = "California Region") +
+  theme(aspect.ratio = 1,
+        axis.text.x  = element_text(size = 6),
+        axis.text.y = element_text(size = 7))
+#challenge 4 last part
 ```
 
 -   At least one numeric variable and one categorical variable
 
 ```{r}
 #| label: dvs-2-num-cat
-
+ggplot(data = surveys, 
+       mapping = aes(x = species, 
+                     y = weight)) +  
+  geom_boxplot(outlier.shape = NA)  + 
+  geom_jitter(alpha = 0.5, 
+              color ="maroon") +  
+  labs(x = "Species", 
+       y = "Weight in grams", 
+       title = "Rodent species' and their weight distributions") +
+  theme(axis.text.x = element_text(angle = 45, 
+                                   hjust = 1))  
+#lab 2 question 8
 ```
 
 -   At least two categorical variables
 
 ```{r}
 #| label: dvs-2-cat
-
+ggplot(df_long, aes(x = study_year, 
+                    y = median_price,
+                    color = fct_reorder2(census_region, study_year, median_price))) +
+  geom_point() +
+  scale_x_continuous(breaks = seq(2008, 2018, by = 2)) +
+  scale_y_continuous(trans = "log10",
+                     breaks = c(100,150,200,300,400,500),
+                     labels = scales::dollar) +
+  geom_smooth() +
+  facet_grid(care_type ~ child_type, scales = "free_y") +  
+  labs(x = "Study Year", y = "Median price", color = "California Region") +
+  theme(aspect.ratio = 1,
+        axis.text.x  = element_text(size = 6),
+        axis.text.y = element_text(size = 7))
+#challenge 4 last part. Two categorical variables are the type of care and age
 ```
 
 -   Dates (time series plot)
@@ -301,35 +429,61 @@ The following assignments satisfy the above criteria:
 
 ```{r}
 #| label: dvs-2-ex-1
-
+theme(axis.text.x = element_text(angle = 45, 
+                                   hjust = 1))  
+#lab 2 question 8
 ```
 
 -   I can modify my colors to be accessible to anyone's eyes
 
 ```{r}
 #| label: dvs-2-ex-2
+blues <- colorRampPalette(c("lightblue", "darkblue"))(10) 
 
+ggplot(df_long, aes(x = study_year, 
+                    y = median_price,
+                    color = fct_reorder2(census_region, study_year, median_price))) +
+  geom_point() +
+  scale_x_continuous(breaks = seq(2008, 2018, by = 2)) +
+  scale_y_continuous(trans = "log10",
+                     breaks = c(100,150,200,300,400,500),
+                     labels = scales::dollar) +
+  geom_smooth() +
+  facet_grid(care_type ~ child_type, scales = "free_y") +  
+  labs(x = "Study Year", y = "Median price", color = "California Region") +
+  theme(aspect.ratio = 1,
+        axis.text.x  = element_text(size = 6),
+        axis.text.y = element_text(size = 7)) +
+  scale_color_manual(values = blues)
+#challenge 4 last part
 ```
 
 -   I can modify my plot titles to clearly communicate the data context
 
 ```{r}
 #| label: dvs-2-ex-3
-
+  labs(x = "Study Year", y = "Median price", color = "California Region") +
+#challenge 4 last part
 ```
 
 -   I can modify the text in my plot to be more readable
 
 ```{r}
 #| label: dvs-2-ex-4
-
+  theme(aspect.ratio = 1,
+        axis.text.x  = element_text(size = 6),
+        axis.text.y = element_text(size = 7))
+#challenge 4 last part
 ```
 
 -   I can reorder my legend to align with the colors in my plot
 
 ```{r}
 #| label: dvs-2-ex-5
-
+ggplot(df_long, aes(x = study_year, 
+                    y = median_price,
+                    color = fct_reorder2(census_region, study_year, median_price))) 
+#challenge 4 last part
 ```
 
 **DVS-3: I show creativity in my visualizations**
@@ -338,28 +492,53 @@ The following assignments satisfy the above criteria:
 
 ```{r}
 #| label: dvs-3-1-ex-1
-
+  scale_fill_manual(values = c("excellent" = "#b796d4", "standard" = "#ba945c")) +
+#challenge 3 Q2
 ```
 
 -   I can use non-standard colors (Example 2)
 
 ```{r}
 #| label: dvs-3-1-ex-2
+blues <- colorRampPalette(c("lightblue", "darkblue"))(10) 
 
+ggplot(df_long, aes(x = study_year, 
+                    y = median_price,
+                    color = fct_reorder2(census_region, study_year, median_price))) +
+  geom_point() +
+  scale_x_continuous(breaks = seq(2008, 2018, by = 2)) +
+  scale_y_continuous(trans = "log10",
+                     breaks = c(100,150,200,300,400,500),
+                     labels = scales::dollar) +
+  geom_smooth() +
+  facet_grid(care_type ~ child_type, scales = "free_y") +  
+  labs(x = "Study Year", y = "Median price", color = "California Region") +
+  theme(aspect.ratio = 1,
+        axis.text.x  = element_text(size = 6),
+        axis.text.y = element_text(size = 7)) +
+  scale_color_manual(values = blues)
+
+#challenge 4 last part revised
 ```
 
 -   I can use annotations (e.g., `geom_text()`)
 
 ```{r}
 #| label: dvs-3-2
-
+geom_smooth(method = "lm", se = FALSE) + 
+  labs(x = "Median Household Income ($2,018)",
+       y = "Median Weekly Price for Center-Based Childcare")
+#lab 4 question 8
 ```
 
 -   I can choose creative geometries (e.g., `geom_segment()`, `geom_ribbon)()`)
 
 ```{r}
 #| label: dvs-3-3
-
+geom_smooth(method = "lm", se = FALSE) + #got this from chat
+  labs(x = "Median Household Income ($2,018)",
+       y = "Median Weekly Price for Center-Based Childcare")
+#lab 4 question 8
 ```
 
 **DVS-4: I can calculate numerical summaries of variables.**
@@ -368,14 +547,25 @@ The following assignments satisfy the above criteria:
 
 ```{r}
 #| label: dvs-4-summarize
-
+summarise(median_household_income = median(mhi_2018, na.rm = TRUE),
+            .groups = "drop") |>
+#lab 4 question 5
 ```
 
 -   Example using `across()`
 
 ```{r}
 #| label: dvs-4-across
-
+averages <- teacher_evals_clean |> 
+  filter(question_no == 901) |>
+  group_by(teacher_id) |> 
+  mutate(
+    n_courses = n_distinct(course_id),
+    across(SET_score_avg, 
+           ~ mean(.x, na.rm = TRUE), 
+           .names = "avg_q1")) |>
+  filter(n_courses>=5) 
+#lab 3 question 10 revised
 ```
 
 **DVS-5: I can find summaries of variables across multiple groups.**
@@ -384,14 +574,20 @@ The following assignments satisfy the above criteria:
 
 ```{r}
 #| label: dvs-5-1
-
+teacher_evals_clean |>  
+  group_by(course_id, teacher_id) |>
+  summarize(num_questions = n(), .groups= "drop") |>
+#lab 3 Q9
 ```
 
 -   Example 2
 
 ```{r}
 #| label: dvs-5-2
-
+group_by(census_region, study_year) |>  
+  summarise(median_household_income = median(mhi_2018, na.rm = TRUE),
+            .groups = "drop") |>
+#lab 4 q5
 ```
 
 **DVS-6: I can create tables which make my summaries clear to the reader.**
@@ -400,7 +596,11 @@ The following assignments satisfy the above criteria:
 
 ```{r}
 #| label: dvs-6-ex-1
-
+pivot_longer(
+    cols = c(mc_infant, mc_toddler, mc_preschool),
+    names_to = "child_type",
+    values_to = "median_price") |>
+#lab 4 q7
 ```
 
 -   I can modify the text in my table to be more readable (e.g., bold face for column headers)
@@ -414,7 +614,14 @@ The following assignments satisfy the above criteria:
 
 ```{r}
 #| label: dvs-6-ex-3
-
+ca_childcare |> 
+  filter(study_year == 2008 | study_year == 2018) |>
+  group_by(census_region, study_year) |>
+  summarise(infants = median(mfcc_infant, na.rm = TRUE),
+            toddlers = median(mfcc_toddler, na.rm = TRUE),
+            preschoolers = median(mfcc_preschool, na.rm = TRUE),
+            .groups = "drop") 
+#challenge 4 2nd to last part
 ```
 
 **DVS-7: I show creativity in my tables.**
@@ -430,7 +637,11 @@ The following assignments satisfy the above criteria:
 
 ```{r}
 #| label: dvs-7-ex-2
-
+pivot_longer(
+    cols = c(mc_infant, mc_toddler, mc_preschool),
+    names_to = "child_type",
+    values_to = "median_price") |>
+#lab 4 q7
 ```
 
 ## Program Efficiency
@@ -441,14 +652,21 @@ The following assignments satisfy the above criteria:
 
 ```{r}
 #| label: pe-1-one-call
-
+averages |> filter(avg_q1 == min(avg_q1) | avg_q1 == max(avg_q1))
+#lab 3 q10
 ```
 
 -   using `across()`
 
 ```{r}
 #| label: pe-1-across
-
+ mutate(
+    n_courses = n_distinct(course_id),
+    across(SET_score_avg, 
+           ~ mean(.x, na.rm = TRUE), 
+           .names = "avg_q1")) |>
+  filter(n_courses >= 5) 
+#lab 3 Q10 
 ```
 
 -   using functions from the `map()` family
@@ -510,14 +728,23 @@ The following assignments satisfy the above criteria:
 
 ```{r}
 #| label: pe-4-1
-
+group_by(course_id, teacher_id) |>
+  summarize(num_questions = n(), .groups= "drop") |> 
+#lab 3 q9 group_by supersedes aggregate
 ```
 
 -   I can connect a data wrangling pipeline into a `ggplot()`
 
 ```{r}
 #| label: pe-4-2
-
+ca_childcare |> 
+  select(mhi_2018, study_year, census_region, mc_infant) |>
+  ggplot(aes(x = mhi_2018, y = mc_infant)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) + #got this from chat
+  labs(x = "Median Household Income ($2,018)",
+       y = "Median Weekly Price for Center-Based Childcare")
+#lab 4 q8
 ```
 
 ## Data Simulation & Statisical Models
@@ -544,14 +771,18 @@ The following assignments satisfy the above criteria:
 
 ```{r}
 #| label: dsm-2-1
-
+reg_mod1 <- lm(mc_infant ~ mhi_2018, data = ca_childcare)
+summary(reg_mod1)
+#lab 4 question 9
 ```
 
 -   Example 2
 
 ```{r}
 #| label: dsm-2-2
-
+result <- t.test(len ~ supp, data= ToothGrowth, var.equal= FALSE, alternative= "two.sided")
+  
+#lab 1 question 9
 ```
 
 -   Example 3
@@ -559,20 +790,54 @@ The following assignments satisfy the above criteria:
 ```{r}
 #| label: dsm-2-3
 
+species_mod <- aov(weight ~ species, data = surveys)
+
+summary(species_mod)
+#lab 2 question 17
 ```
 
 ## Revising My Thinking
 
-<!-- How did you revise your thinking throughout the course? How did you revise your thinking on the code examples you have provided in your portfolio? -->
+<!-- How did you revise your thinking throughout the course? How did you revise your thinking on the code examples you have provided in your portfolio? --> Throughout the course, I revised my thinking by making sure to format my code heavily. Before, I would not put spaces on either side of my equal sign and I would often have many arguments for a function all in one line. However, now in almost all of my code it is formatted way better.
 
-<!-- For the revisions included in your Portfolio, to help me understand the nature of your revisions, please denote somehow the feedback I provided you (e.g., boldface, italics, colored text) before your revisions. -->
+<!-- For the revisions included in your Portfolio, to help me understand the nature of your revisions, please denote somehow the feedback I provided you (e.g., boldface, italics, colored text) before your revisions. --> For PE-1 I included a revised piece of code where I show the max and min of a dataset. When I originally submitted it I found the max and the min on different lines and you suggested that I find a way to make it just one line.
 
 ## Extending My Thinking
 
-<!-- How did you extended your thinking throughout the course? How did you extend your thinking on the code examples you have provided in your portfolio? -->
+<!-- How did you extended your thinking throughout the course? How did you extend your thinking on the code examples you have provided in your portfolio? --> Throughout the course I have been extending my thinking by seeing how I can concisely meet all of the requirements provided and make it look good. For example, in my yaml I apply the cyborg theme so that my HTML looks cool and in challenge 4 (code in DVS-2) I changed the color of the graph I made to colors that I like.
+
+```{r}
+---
+title: "Lab 5: Murder in SQL City"
+subtitle: "`join` + `filter` + `stringr` + `ludridate`"
+author: "Jake Lugenbuehl"
+format: 
+  html:
+    code-fold: true
+    code-tools: true
+    toc: true
+    toc-depth: 2
+    toc-title: Contents
+    toc-expand: true
+    toc-location: left
+    theme: cyborg
+    embed-resources: true
+self-contained: true
+editor: source
+execute: 
+  echo: true
+  error: true
+  message: false
+  warning: false
+---
+```
 
 ## Peer Support & Collaboration
 
 <!-- Include an image or a description of feedback you gave that you are proud of (either in a peer review or in Discord). -->
 
+![](images/clipboard-727338355.png)
+
 <!-- Include a description of how you grew as a collaborator through the weekly pair programming activities.   -->
+
+I feel as though I have definitely grown as a collaborator in these weekly pair programming activities because usually the group I am with can actually finish on time now. At the beginning it was hard to keep my mouth shut when I was the typer and give good commands when I was the thinker, but now with whatever partner I work with I feel like we complete the assignments very efficiently.
