@@ -130,7 +130,7 @@ averages |> filter(avg_q1 == min(avg_q1) | avg_q1 == max(avg_q1))
 -   Numeric Example 2
 
 ```{r}
-#| label: wd-3-numeric-ex-1
+#| label: wd-3-numeric-ex-2
 averages <- teacher_evals_clean |> 
   filter(question_no == 901) |>
   group_by(teacher_id) |> 
