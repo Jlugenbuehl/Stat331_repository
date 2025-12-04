@@ -8,7 +8,7 @@ editor: visual
 
 1.  Finish the sentence with another student’s name: "If \[Name of Student\] doesn’t earn an A, then nobody should, because..." Explain your choice and your reasoning.
 
-    1.  If Fisher doesn't earn an A, then nobody should, because he's really smart.
+    1.  If Fisher doesn't earn an A, then nobody should, because he's hella smart.
 
 2.  What was the most difficult part of the class for you? List a general topic, a specific problem, a kind of work we did, etc. and explain why.
 
