@@ -1,8 +1,17 @@
 ---
 title: "STAT 331 Portfolio"
 author: "Jake Lugenbuehl"
-format: html 
-embed-resources: true
+format: 
+  html:
+    code-fold: true
+    code-tools: true
+    toc: true
+    toc-depth: 2
+    toc-title: Contents
+    toc-expand: true
+    toc-location: left
+    theme: cyborg
+    embed-resources: true
 layout: margin-left
 editor: visual
 execute: 
@@ -12,7 +21,7 @@ execute:
 
 [**My Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be an A.
 
--   I believe I have earned this grade since I have proficiency with all learning targets, have submitted revisions for all but a few assignments, provided constructive feedback every week, was always an excellent partner when collaborating, and regularly pushed myself to use what is learned in class in assignments and difficult problems.
+-   I believe I have earned this grade since I have proficiency with all learning targets, have submitted revisions for all but a few assignments, provided constructive feedback every week, was always an excellent partner when collaborating, and regularly pushed myself to use what is learned in class in assignments and difficult problems (i.e. the yaml theme of this portfolio).
 
 [**Learning Objective Evidence:**]{.underline} In the code chunks below, provide code from Lab or Challenge assignments where you believe you have demonstrated proficiency with the specified learning target. Be sure to specify **where** the code came from (e.g., Lab 4 Question 2).
 
