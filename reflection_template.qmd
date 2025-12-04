@@ -10,7 +10,9 @@ execute:
   echo: true
 ---
 
-[**My Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be an \_\_.
+[**My Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be an A.
+
+-   I believe I have earned this grade since I have proficiency with all learning targets, have submitted revisions for all but a few assignments, provided constructive feedback every week, was always an excellent partner when collaborating, and regularly pushed myself to use what is learned in class in assignments and difficult problems.
 
 [**Learning Objective Evidence:**]{.underline} In the code chunks below, provide code from Lab or Challenge assignments where you believe you have demonstrated proficiency with the specified learning target. Be sure to specify **where** the code came from (e.g., Lab 4 Question 2).
 
